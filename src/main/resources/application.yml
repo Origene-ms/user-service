@@ -1,1 +1,33 @@
-# Spring Boot configuration
+server:
+  port: 8001
+
+jwt:
+  secret: "f3b12f006f6015d7994dfda30aa14d16a9f368de4b774c982fdfa6c1eb7f673fe56634b84483dcf3e639174fedfcfb1aebafa2eae3dbbda18a5c2f256cf6c9c6"
+
+spring:
+  data:
+    mongodb:
+      uri: "mongodb+srv://Orizeen:Orizeen%40123@cluster0.pwpmq.mongodb.net/users?retryWrites=true&w=majority"
+
+app:
+  host: "http://localhost:8001"
+  sender:
+    email: "sarzeib@gmail.com"
+
+sendgrid:
+  api:
+    key: "sendergrid_api_key"
+
+#logging:
+#  level:
+#    org:
+#      springframework: DEBUG
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health
