@@ -17,8 +17,8 @@ public class CustomUserDetailsService implements ReactiveUserDetailsService {
     }
 
     @Override
-    public Mono<UserDetails> findByUsername(String email) {
-        return userRepository.findByEmail(email)
+    public Mono<UserDetails> findByUsername(String id) {
+        return userRepository.findById(id)
                 .map(UserDetailsImpl::build);
     }
 }

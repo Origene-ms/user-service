@@ -4,6 +4,7 @@ import com.origene.userservice.dto.request.UserDTO;
 import com.origene.userservice.dto.response.UserLoginResponse;
 import com.origene.userservice.enums.ActiveStatus;
 import com.origene.userservice.exception.RequestValidationException;
+import com.origene.userservice.exception.ResourceNotFoundException;
 import com.origene.userservice.mapper.UserMapper;
 import com.origene.userservice.model.User;
 import com.origene.userservice.model.UserRefreshToken;
@@ -45,7 +46,7 @@ public class UserService {
 
     public Mono<User> signup(UserDTO userDTO) {
         return userRepository.findByEmail(userDTO.getEmail())
-                .flatMap(existingUser -> Mono.<User>error(new RequestValidationException("User with associated email already exists")))
+                .flatMap(existingUser -> Mono.<User>error(new ResourceNotFoundException("User with associated email already exists")))
                 .switchIfEmpty(Mono.defer(() -> {
                     User newUser = UserMapper.toUser(userDTO);
                     newUser.setPassword(PasswordUtil.encryptPassword((userDTO.getPassword())));
@@ -59,7 +60,7 @@ public class UserService {
                 }));
     }
 
-    public Mono<User> login(String email, String password) {
+    public Mono<UserLoginResponse> login(String email, String password) {
         return userRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new RuntimeException("User does not exist")))
                 .flatMap(user -> {
@@ -73,29 +74,32 @@ public class UserService {
 
                     String accessToken = jwtUtil.generateToken(user.getId());
                     String refreshToken = jwtUtil.generateToken(user.getId());
-
                     UserRefreshToken userRefreshToken = new UserRefreshToken();
-
                     return userRefreshTokenRepository.save(userRefreshToken)
-                        .then(Mono.just(user))
-                        .doOnNext(existingUser -> {
-                            if (ActiveStatus.INACTIVE.name().equals(user.getActiveStatus())) {
-                                user.setActiveStatus(ActiveStatus.ACTIVE.name());
-                                userRepository.save(user).subscribe();
-                            }
-                        })
-                        .flatMap(updatedUser -> {
-                            UserLoginResponse userLoginResponse = new UserLoginResponse();
-                            userLoginResponse.setStatus(200);
-                            userLoginResponse.setAccessToken(accessToken);
-                            userLoginResponse.setRefreshToken(refreshToken);
-                            if (user.isAdmin()) {
-                                String adminToken = jwtUtil.generateToken(user.getId());
-                                userLoginResponse.setAdminToken(adminToken);
-                            }
+                            .then(Mono.just(user))
+                            .doOnNext(existingUser -> {
+                                if (ActiveStatus.INACTIVE.name().equals(user.getActiveStatus())) {
+                                    user.setActiveStatus(ActiveStatus.ACTIVE.name());
+                                    userRepository.save(user).subscribe();
+                                }
+                            })
+                            .flatMap(updatedUser -> {
+                                // Initialize the login response object
+                                UserLoginResponse userLoginResponse = new UserLoginResponse(200, "Login Successful!");
+                                userLoginResponse.setStatus(200);
+                                userLoginResponse.setAccessToken(accessToken);
+                                userLoginResponse.setRefreshToken(refreshToken);
+                                userLoginResponse.setUser(UserMapper.toUserDTO(user)); // Assuming such a utility method exists
+                                userLoginResponse.setMessage("Login Successful!");
 
-                            return Mono.just(updatedUser);
-                        });
+                                // Additional logic for admin users
+                                if (user.isAdmin()) {
+                                    String adminToken = jwtUtil.generateToken(user.getId());
+                                    userLoginResponse.setAdminToken(adminToken); // Add admin token for admin users
+                                }
+
+                                return Mono.just(userLoginResponse);
+                            });
                 });
     }
 
@@ -109,7 +113,8 @@ public class UserService {
     }
 
     public Mono<User> getUserById(String id) {
-        return userRepository.findById(id);
+        return userRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("User not found with id: " + id)));
     }
 
     public Mono<User> getMyUser() {
@@ -118,7 +123,7 @@ public class UserService {
                     user.setLastActiveTime(LocalDateTime.now()); // Update lastActiveTime
                     return userRepository.save(user); // Save the updated user
                 })
-                .onErrorResume(e -> Mono.error(new RequestValidationException(e.getMessage()))); // Handle errors gracefully
+                .onErrorResume(e -> Mono.error(new ResourceNotFoundException(e.getMessage()))); // Handle errors gracefully
     }
 
     public Mono<User> getCurrentUser() {
