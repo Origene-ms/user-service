@@ -4,6 +4,7 @@ import com.origene.userservice.dto.request.RefreshTokenDTO;
 import com.origene.userservice.dto.request.ForgotTokenDto;
 import com.origene.userservice.dto.request.UpdatePasswordDTO;
 import com.origene.userservice.dto.request.UserDTO;
+import com.origene.userservice.dto.response.UserLoginResponse;
 import com.origene.userservice.enums.ActiveStatus;
 import com.origene.userservice.model.User;
 import com.origene.userservice.service.UserService;
@@ -35,7 +36,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Mono<ResponseEntity<User>> login(@RequestBody UserDTO userDTO) {
+    public Mono<ResponseEntity<UserLoginResponse>> login(@RequestBody UserDTO userDTO) {
         return userService.login(userDTO.getEmail(), userDTO.getPassword())
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));

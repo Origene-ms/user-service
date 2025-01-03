@@ -36,4 +36,28 @@ public class UserMapper {
 
         return user;
     }
+
+    public static UserDTO toUserDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setName(user.getName());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setDateOfBirth(user.getDateOfBirth());
+        userDTO.setCommunity(user.getCommunity());
+        userDTO.setPictureName(user.getPictureName());
+        userDTO.setCountry(user.getCountry());
+        userDTO.setAddress(user.getAddress());
+        userDTO.setPlaceDetails(user.getPlaceDetails());
+        userDTO.setActiveStatus("INACTIVE"); // Default active status
+        userDTO.setLastActiveTime(LocalDateTime.now()); // Set current time
+        userDTO.setAdmin(false); // Default admin status
+        userDTO.setRoles(Collections.emptyList()); // Default roles
+
+        return userDTO;
+    }
 }
