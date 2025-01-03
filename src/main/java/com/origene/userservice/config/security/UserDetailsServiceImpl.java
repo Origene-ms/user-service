@@ -1,6 +1,5 @@
-package com.origene.userservice.service;
+package com.origene.userservice.config.security;
 
-import com.origene.userservice.config.security.UserDetailsImpl;
 import com.origene.userservice.model.User;
 import com.origene.userservice.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
