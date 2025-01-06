@@ -1,5 +1,6 @@
 package com.origene.userservice.service;
 
+import com.origene.userservice.config.security.UserDetailsImpl;
 import com.origene.userservice.dto.request.UserDTO;
 import com.origene.userservice.dto.response.UserLoginResponse;
 import com.origene.userservice.enums.ActiveStatus;
@@ -14,7 +15,9 @@ import com.origene.userservice.repository.UserRepository;
 import com.origene.userservice.repository.UserVerificationTokenRepository;
 import com.origene.userservice.util.JwtUtil;
 import com.origene.userservice.util.PasswordUtil;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -22,6 +25,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,7 +65,7 @@ public class UserService {
     }
 
     public Mono<UserLoginResponse> login(String email, String password) {
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmailAndActiveStatusIn(email, Arrays.asList(ActiveStatus.ACTIVE.name(), ActiveStatus.INACTIVE.name(), ActiveStatus.UNVERIFIED.name()))
                 .switchIfEmpty(Mono.error(new RuntimeException("User does not exist")))
                 .flatMap(user -> {
                     if (!PasswordUtil.isPasswordMatch(password, user.getPassword())) {
@@ -128,10 +132,19 @@ public class UserService {
 
     public Mono<User> getCurrentUser() {
         return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext -> securityContext.getAuthentication().getCredentials().toString()) // Extract JWT token
-                .flatMap(jwtToken -> {
-                    String userId = jwtUtil.getUsernameFromToken(jwtToken); // Extract userId from JWT
-                    return userRepository.findById(userId);
+                .flatMap(context -> {
+                    Authentication authentication = context.getAuthentication();
+                    if (authentication != null && authentication.isAuthenticated()) {
+                        UserDetails userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                        return userRepository.findByEmail(userDetails.getUsername())
+                                .flatMap(user -> {
+                                    user.setLastActiveTime(LocalDateTime.now());
+                                    return userRepository.save(user);
+                                })
+                                .switchIfEmpty(Mono.error(new ResourceNotFoundException("User not found")));
+                    } else {
+                        return Mono.error(new ResourceNotFoundException("User not authenticated."));
+                    }
                 });
     }
 

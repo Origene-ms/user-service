@@ -1,5 +1,6 @@
 package com.origene.userservice.config.security;
 
+import com.origene.userservice.config.filter.AuthTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
