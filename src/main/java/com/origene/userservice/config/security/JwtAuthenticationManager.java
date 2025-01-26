@@ -11,21 +11,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtAuthenticationManager implements AuthenticationManager {
 
-    private final JwtUtil jwtUtil;
+  private final JwtUtil jwtUtil;
 
-    public JwtAuthenticationManager(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
+  public JwtAuthenticationManager(JwtUtil jwtUtil) {
+    this.jwtUtil = jwtUtil;
+  }
+
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    String token = authentication.getCredentials().toString();
+
+    if (jwtUtil.validateToken(token)) {
+      String username = jwtUtil.getUsernameFromToken(token);
+      return new UsernamePasswordAuthenticationToken(username, null, authentication.getAuthorities());
+    } else {
+      throw new BadCredentialsException("Invalid JWT token");
     }
-
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String token = authentication.getCredentials().toString();
-
-        if (jwtUtil.validateToken(token)) {
-            String username = jwtUtil.getUsernameFromToken(token);
-            return new UsernamePasswordAuthenticationToken(username, null, authentication.getAuthorities());
-        } else {
-            throw new BadCredentialsException("Invalid JWT token");
-        }
-    }
+  }
 }

@@ -10,15 +10,15 @@ import reactor.core.publisher.Mono;
 @Service
 public class CustomUserDetailsService implements ReactiveUserDetailsService {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+  public CustomUserDetailsService(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
 
-    @Override
-    public Mono<UserDetails> findByUsername(String id) {
-        return userRepository.findById(id)
-                .map(UserDetailsImpl::build);
-    }
+  @Override
+  public Mono<UserDetails> findByUsername(String id) {
+    return userRepository.findById(id)
+            .map(UserDetailsImpl::build);
+  }
 }

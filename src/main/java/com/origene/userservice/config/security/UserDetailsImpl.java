@@ -16,102 +16,102 @@ import java.util.stream.Collectors;
  */
 public class UserDetailsImpl implements UserDetails {
 
-    @Getter
-    private final String id;
-    private final String email;
-    private final String password;
-    private final Collection<? extends GrantedAuthority> authorities;
+  @Getter
+  private final String id;
+  private final String email;
+  private final String password;
+  private final Collection<? extends GrantedAuthority> authorities;
 
-    /**
-     * Private constructor for UserDetailsImpl.
-     */
-    private UserDetailsImpl(String id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.authorities = authorities;
+  /**
+   * Private constructor for UserDetailsImpl.
+   */
+  private UserDetailsImpl(String id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    this.id = id;
+    this.email = email;
+    this.password = password;
+    this.authorities = authorities;
+  }
+
+  /**
+   * Static factory method to build a UserDetailsImpl object from a User entity.
+   *
+   * @param user The User entity.
+   * @return A UserDetailsImpl instance.
+   */
+  public static UserDetailsImpl build(User user) {
+    if (user == null) {
+      throw new IllegalArgumentException("User cannot be null.");
     }
 
-    /**
-     * Static factory method to build a UserDetailsImpl object from a User entity.
-     *
-     * @param user The User entity.
-     * @return A UserDetailsImpl instance.
-     */
-    public static UserDetailsImpl build(User user) {
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null.");
-        }
+    List<GrantedAuthority> authorities = user.getRoles().stream()
+            .map(role -> new SimpleGrantedAuthority(role.name()))
+            .collect(Collectors.toList());
 
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.name()))
-                .collect(Collectors.toList());
+    return new UserDetailsImpl(
+            user.getId(),
+            user.getEmail(),
+            user.getPassword(),
+            authorities
+    );
+  }
 
-        return new UserDetailsImpl(
-                user.getId(),
-                user.getEmail(),
-                user.getPassword(),
-                authorities
-        );
-    }
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return authorities;
+  }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
+  @Override
+  public String getPassword() {
+    return password;
+  }
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
+  @Override
+  public String getUsername() {
+    return email;
+  }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
+  /**
+   * Account is considered non-expired by default.
+   * Customize this logic if necessary.
+   */
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
 
-    /**
-     * Account is considered non-expired by default.
-     * Customize this logic if necessary.
-     */
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+  /**
+   * Account is considered non-locked by default.
+   * Customize this logic if necessary.
+   */
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
 
-    /**
-     * Account is considered non-locked by default.
-     * Customize this logic if necessary.
-     */
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+  /**
+   * Credentials are considered non-expired by default.
+   * Customize this logic if necessary.
+   */
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
 
-    /**
-     * Credentials are considered non-expired by default.
-     * Customize this logic if necessary.
-     */
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+  /**
+   * Account is enabled by default.
+   * Customize this logic if necessary.
+   */
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
 
-    /**
-     * Account is enabled by default.
-     * Customize this logic if necessary.
-     */
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "UserDetailsImpl{" +
-                "id='" + id + '\'' +
-                ", email='" + email + '\'' +
-                ", authorities=" + authorities +
-                '}';
-    }
+  @Override
+  public String toString() {
+    return "UserDetailsImpl{" +
+            "id='" + id + '\'' +
+            ", email='" + email + '\'' +
+            ", authorities=" + authorities +
+            '}';
+  }
 }

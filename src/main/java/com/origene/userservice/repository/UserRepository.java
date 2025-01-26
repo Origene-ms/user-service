@@ -6,13 +6,18 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface UserRepository extends ReactiveMongoRepository<User, String> {
-    Mono<User> findByEmail(String email);
-    @NonNull
-    Mono<User> findById(@NonNull String id);
-    @NonNull
-    Flux<User> findAllById(@NonNull Iterable<String> ids);
-    Mono<User> findByEmailAndActiveStatus(String email, String activeStatus);
+  Mono<User> findByEmail(String email);
+
+  @NonNull
+  Mono<User> findById(@NonNull String id);
+
+  @NonNull
+  Flux<User> findAllById(@NonNull Iterable<String> ids);
+
+  Mono<User> findByEmailAndActiveStatus(String email, String activeStatus);
+
+  Mono<User> findByEmailAndActiveStatusIn(String email, List<String> statuses);
 }

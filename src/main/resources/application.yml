@@ -16,12 +16,19 @@ app:
 
 sendgrid:
   api:
-    key: "sendergrid_api_key"
+    key: ${SENDGRID_API_KEY}
+
 
 #logging:
 #  level:
 #    org:
 #      springframework: DEBUG
+
+logging:
+  level:
+    org:
+      springframework: INFO
+
 
 management:
   endpoint:

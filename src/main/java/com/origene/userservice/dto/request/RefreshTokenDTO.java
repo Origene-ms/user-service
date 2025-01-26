@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class RefreshTokenDTO {
-    String refreshToken;
-    String userId;
+  String refreshToken;
+  String userId;
 }

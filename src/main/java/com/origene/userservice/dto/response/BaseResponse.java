@@ -6,10 +6,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class BaseResponse {
-    private int status;
-    private String message;
-    public BaseResponse(int status, String message) {
-        this.status = status;
-        this.message = message;
-    }
+  private int status;
+  private String message;
+
+  public BaseResponse(int status, String message) {
+    this.status = status;
+    this.message = message;
+  }
 }

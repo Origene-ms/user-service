@@ -17,13 +17,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     this.userRepository = userRepository;
   }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
     User user = userRepository.findByEmail(email)
             .switchIfEmpty(Mono.error(new UsernameNotFoundException("User Not Found with email: " + email)))
             .block(); // Blocking here is safe for authentication purposes
 
-        assert user != null;
-        return UserDetailsImpl.build(user);
+    assert user != null;
+    return UserDetailsImpl.build(user);
   }
 }

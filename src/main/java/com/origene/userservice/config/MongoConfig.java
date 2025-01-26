@@ -12,17 +12,17 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackages = "com.origene.userservice.repository")
 public class MongoConfig extends AbstractReactiveMongoConfiguration {
 
-    @Value("${spring.data.mongodb.uri}")
-    private String mongoUri;
+  @Value("${spring.data.mongodb.uri}")
+  private String mongoUri;
 
-    @Override
-    protected String getDatabaseName() {
-        return "users";
-    }
+  @Override
+  protected String getDatabaseName() {
+    return "users";
+  }
 
-    @Bean
-    @Override
-    public MongoClient reactiveMongoClient() {
-        return MongoClients.create(mongoUri);
-    }
+  @Bean
+  @Override
+  public MongoClient reactiveMongoClient() {
+    return MongoClients.create(mongoUri);
+  }
 }

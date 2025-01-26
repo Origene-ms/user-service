@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document(collection = "communities")
 public class Community {
-    @Id
-    private String id;
-    private String name;
+  @Id
+  private String id;
+  private String name;
 }
